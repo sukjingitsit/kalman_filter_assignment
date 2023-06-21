@@ -40,14 +40,17 @@ class KalmanFilter(object):
     """
 
     def __init__(self):
-        dt=1.0
-
+        delta=1.0
         # Create Kalman filter model matrices.
- ##ADD code
+        self.state_transition = np.eye(8,8)
+        for i in range(4) :
+            motion[i, i+4] = delta
+        self.observation = np.eye(4,8)
         # Motion and observation uncertainty are chosen relative to the current
         # state estimate. These weights control the amount of uncertainty in
         # the model. This is a bit hacky.
-##ADD code
+        self.pos_error = 0.1
+        self.vel_error = 0.01
 
     def initiate(self, measurement):
         """Create track from unassociated measurement.
@@ -66,7 +69,15 @@ class KalmanFilter(object):
             to 0 mean.
 
         """
-##ADD code
+        mean_pos = measurement
+        mean_vel = np.zeros(4,1)
+        mean = np.concat(mean_pos, mean_vel)
+
+        covariance = np.eye(8,8)
+        for i in range(4):
+            covariance[i,i] = 10*mean[i,1]*self.pos_error
+        for i in range(4):
+            covariance[4+i,4+i] = 10*mean[i,1]*self.vel_error
         return mean, covariance
 
     def predict(self, mean, covariance):
@@ -88,8 +99,9 @@ class KalmanFilter(object):
             state. Unobserved velocities are initialized to 0 mean.
 
         """
-##ADD code
-        return mean, covariance
+        new_mean = np.dot(self.state_transition,self.mean)
+        new_cov = np.dot(np.dot(self.state_transition,self.mean),state_transition.T)
+        return new_mean, new_covariance
 
     def project(self, mean, covariance):
         """Project state distribution to measurement space.
@@ -108,8 +120,9 @@ class KalmanFilter(object):
             estimate.
 
         """
-##ADD code
-        return mean, covariance
+        new_mean = np.dot(self.observation, mean)
+        new_cov = np.dot(self.observation, mean, self.observation.T)
+        return new_mean, new_covariance
 
     def update(self, mean, covariance, measurement):
         """Run Kalman filter correction step.
@@ -131,7 +144,12 @@ class KalmanFilter(object):
             Returns the measurement-corrected state distribution.
 
         """
-##ADD code
+        pred_mean, pred_cov = project(self,predict(self, mean, covariance))
+        chol_factor, lower = scipy.linalg.cho_factor(pred_cov, lower=True, check_finite=False)
+        kalman_gain = scipy.linalg.cho_solve((chol_factor, lower), np.dot(covariance, self.observation.T).T).T
+        innovation = measurement - pred_mean
+        new_mean = mean + np.dot(kalman_gain,innovation)
+        new_covariance = covariance - np.dot(np.dot(kalman_gain, projected_cov), kalman_gain.T)
         return new_mean, new_covariance
 
     def gating_distance(self, mean, covariance, measurements, only_position=False):
