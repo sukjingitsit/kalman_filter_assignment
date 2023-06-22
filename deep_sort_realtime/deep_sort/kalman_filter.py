@@ -105,7 +105,7 @@ class KalmanFilter(object):
         for i in range(4):
             pred_cov[4+i,4+i] = mean[i]*self.vel_error
         new_mean = np.dot(self.state_transition,mean)
-        new_cov = np.dot(np.dot(self.state_transition,covariance),state_transition.T) + pred_cov
+        new_cov = np.dot(np.dot(self.state_transition,covariance),self.state_transition.T) + pred_cov
         return new_mean, new_covariance
 
     def project(self, mean, covariance):
