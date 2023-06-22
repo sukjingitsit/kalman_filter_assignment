@@ -69,9 +69,9 @@ class KalmanFilter(object):
             to 0 mean.
 
         """
-        mean_pos = measurement
-        mean_vel = np.zeros((4,1))
-        mean = np.concatenate((mean_pos, mean_vel))
+        mean = np.zeros(8)
+        for i in range(4):
+            mean[i] = measurement[i]
 
         covariance = np.eye(8,8)
         for i in range(4):
