@@ -106,7 +106,7 @@ class KalmanFilter(object):
             pred_cov[4+i,4+i] = mean[i]*self.vel_error
         new_mean = np.dot(self.state_transition,mean)
         new_cov = np.dot(np.dot(self.state_transition,covariance),self.state_transition.T) + pred_cov
-        return new_mean, new_covariance
+        return new_mean, new_cov
 
     def project(self, mean, covariance):
         """Project state distribution to measurement space.
@@ -130,7 +130,7 @@ class KalmanFilter(object):
             proj_cov[i,i] = mean[i]*self.pos_error
         new_mean = np.dot(self.observation, mean)
         new_cov = np.dot(np.dot(self.observation, covariance), self.observation.T) + proj_cov
-        return new_mean, new_covariance
+        return new_mean, new_cov
 
     def update(self, mean, covariance, measurement):
         """Run Kalman filter correction step.
@@ -157,8 +157,8 @@ class KalmanFilter(object):
         kalman_gain = scipy.linalg.cho_solve((chol_factor, lower), np.dot(covariance, self.observation.T).T,check_finite=False).T
         innovation = measurement - pred_mean
         new_mean = mean + np.dot(kalman_gain,innovation)
-        new_covariance = covariance - np.dot(np.dot(kalman_gain, projected_cov), kalman_gain.T)
-        return new_mean, new_covariance
+        new_cov = covariance - np.dot(np.dot(kalman_gain, projected_cov), kalman_gain.T)
+        return new_mean, new_cov
 
     def gating_distance(self, mean, covariance, measurements, only_position=False):
         """Compute gating distance between state distribution and measurements.
