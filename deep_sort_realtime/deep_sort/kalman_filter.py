@@ -152,7 +152,7 @@ class KalmanFilter(object):
             Returns the measurement-corrected state distribution.
 
         """
-        pred_mean, pred_cov = self.project(self, mean, covariance)
+        pred_mean, pred_cov = self.project(mean, covariance)
         chol_factor, lower = scipy.linalg.cho_factor(pred_cov, lower=True, check_finite=False)
         kalman_gain = scipy.linalg.cho_solve((chol_factor, lower), np.dot(covariance, self.observation.T).T,check_finite=False).T
         innovation = measurement - pred_mean
