@@ -44,7 +44,7 @@ class KalmanFilter(object):
         # Create Kalman filter model matrices.
         self.state_transition = np.eye(8,8)
         for i in range(4) :
-            motion[i, i+4] = delta
+            self.state_transition[i, i+4] = delta
         self.observation = np.eye(4,8)
         # Motion and observation uncertainty are chosen relative to the current
         # state estimate. These weights control the amount of uncertainty in
