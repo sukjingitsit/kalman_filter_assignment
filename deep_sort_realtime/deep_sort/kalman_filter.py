@@ -70,7 +70,7 @@ class KalmanFilter(object):
 
         """
         mean_pos = measurement
-        mean_vel = np.zeros(4,1)
+        mean_vel = np.zeros((4,1))
         mean = np.concat(mean_pos, mean_vel)
 
         covariance = np.eye(8,8)
