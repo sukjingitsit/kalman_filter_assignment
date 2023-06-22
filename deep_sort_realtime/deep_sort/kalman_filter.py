@@ -157,7 +157,7 @@ class KalmanFilter(object):
         kalman_gain = scipy.linalg.cho_solve((chol_factor, lower), np.dot(covariance, self.observation.T).T,check_finite=False).T
         innovation = measurement - pred_mean
         new_mean = mean + np.dot(kalman_gain,innovation)
-        new_cov = covariance - np.dot(np.dot(kalman_gain, projected_cov), kalman_gain.T)
+        new_cov = covariance - np.dot(np.dot(kalman_gain, pred_cov), kalman_gain.T)
         return new_mean, new_cov
 
     def gating_distance(self, mean, covariance, measurements, only_position=False):
