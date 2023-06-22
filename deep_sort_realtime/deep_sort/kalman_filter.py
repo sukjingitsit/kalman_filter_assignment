@@ -99,8 +99,13 @@ class KalmanFilter(object):
             state. Unobserved velocities are initialized to 0 mean.
 
         """
-        new_mean = np.dot(self.state_transition,self.mean)
-        new_cov = np.dot(np.dot(self.state_transition,self.mean),state_transition.T)
+        pred_cov = np.eye(8,8)
+        for i in range(4):
+            pred_cov[i,i] = mean[i,1]*self.pos_error
+        for i in range(4):
+            pred_cov[4+i,4+i] = mean[i,1]*self.vel_error
+        new_mean = np.dot(self.state_transition,mean)
+        new_cov = np.dot(np.dot(self.state_transition,covariance),state_transition.T) + pred_cov
         return new_mean, new_covariance
 
     def project(self, mean, covariance):
@@ -120,8 +125,11 @@ class KalmanFilter(object):
             estimate.
 
         """
+        proj_cov = np.eye(4,4)
+        for i in range(4):
+            proj_cov[i,i] = mean[i,1]*self.pos_error
         new_mean = np.dot(self.observation, mean)
-        new_cov = np.dot(self.observation, mean, self.observation.T)
+        new_cov = np.dot(np.dot(self.observation, covariance), self.observation.T) + proj_cov
         return new_mean, new_covariance
 
     def update(self, mean, covariance, measurement):
@@ -144,9 +152,9 @@ class KalmanFilter(object):
             Returns the measurement-corrected state distribution.
 
         """
-        pred_mean, pred_cov = project(self,predict(self, mean, covariance))
+        pred_mean, pred_cov = project(self, mean, covariance)
         chol_factor, lower = scipy.linalg.cho_factor(pred_cov, lower=True, check_finite=False)
-        kalman_gain = scipy.linalg.cho_solve((chol_factor, lower), np.dot(covariance, self.observation.T).T).T
+        kalman_gain = scipy.linalg.cho_solve((chol_factor, lower), np.dot(covariance, self.observation.T).T,check_finite=False).T
         innovation = measurement - pred_mean
         new_mean = mean + np.dot(kalman_gain,innovation)
         new_covariance = covariance - np.dot(np.dot(kalman_gain, projected_cov), kalman_gain.T)
