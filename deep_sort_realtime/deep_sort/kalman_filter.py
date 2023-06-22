@@ -71,7 +71,7 @@ class KalmanFilter(object):
         """
         mean_pos = measurement
         mean_vel = np.zeros((4,1))
-        mean = np.concat(mean_pos, mean_vel)
+        mean = np.concatenate((mean_pos, mean_vel))
 
         covariance = np.eye(8,8)
         for i in range(4):
@@ -152,7 +152,7 @@ class KalmanFilter(object):
             Returns the measurement-corrected state distribution.
 
         """
-        pred_mean, pred_cov = project(self, mean, covariance)
+        pred_mean, pred_cov = self.project(self, mean, covariance)
         chol_factor, lower = scipy.linalg.cho_factor(pred_cov, lower=True, check_finite=False)
         kalman_gain = scipy.linalg.cho_solve((chol_factor, lower), np.dot(covariance, self.observation.T).T,check_finite=False).T
         innovation = measurement - pred_mean
