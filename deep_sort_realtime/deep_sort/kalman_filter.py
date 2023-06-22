@@ -75,9 +75,9 @@ class KalmanFilter(object):
 
         covariance = np.eye(8,8)
         for i in range(4):
-            covariance[i,i] = 10*mean[i,1]*self.pos_error
+            covariance[i,i] = 10*mean[i]*self.pos_error
         for i in range(4):
-            covariance[4+i,4+i] = 10*mean[i,1]*self.vel_error
+            covariance[4+i,4+i] = 10*mean[i]*self.vel_error
         return mean, covariance
 
     def predict(self, mean, covariance):
@@ -101,9 +101,9 @@ class KalmanFilter(object):
         """
         pred_cov = np.eye(8,8)
         for i in range(4):
-            pred_cov[i,i] = mean[i,1]*self.pos_error
+            pred_cov[i,i] = mean[i]*self.pos_error
         for i in range(4):
-            pred_cov[4+i,4+i] = mean[i,1]*self.vel_error
+            pred_cov[4+i,4+i] = mean[i]*self.vel_error
         new_mean = np.dot(self.state_transition,mean)
         new_cov = np.dot(np.dot(self.state_transition,covariance),state_transition.T) + pred_cov
         return new_mean, new_covariance
@@ -127,7 +127,7 @@ class KalmanFilter(object):
         """
         proj_cov = np.eye(4,4)
         for i in range(4):
-            proj_cov[i,i] = mean[i,1]*self.pos_error
+            proj_cov[i,i] = mean[i]*self.pos_error
         new_mean = np.dot(self.observation, mean)
         new_cov = np.dot(np.dot(self.observation, covariance), self.observation.T) + proj_cov
         return new_mean, new_covariance
